@@ -738,6 +738,32 @@ function prParseDoc(doc, pageUrl){
       price=ps[idx]||0;
     }
   }
+  if(!price){
+    var bodyTxt=prTxt(doc.body||doc.documentElement);
+    var bq=/기본\s*수량\s*[:：]?\s*([\d,]+)\s*개/.exec(bodyTxt) || /기본\s*([\d,]+)\s*개/.exec(bodyTxt);
+    var bq2=bq?prParseNum(bq[1]):null;
+    var tables=doc.querySelectorAll('table');
+    for(var k=0;k<tables.length && !price;k++){
+      var qs2=null, ps2=null;
+      tables[k].querySelectorAll('tr').forEach(function(tr){
+        var cells=tr.querySelectorAll('th,td'); if(cells.length<2) return;
+        var head=prTxt(cells[0]).replace(/\s+/g,'');
+        var vals=[]; for(var c=1;c<cells.length;c++) vals.push(prParseNum(prTxt(cells[c])));
+        if(head==='수량' && !qs2) qs2=vals;
+        else if((head==='단가'||head==='판매가') && !ps2) ps2=vals;
+      });
+      if(ps2 && ps2.some(function(v){return v>0;})){
+        var id2=ps2.length-1;
+        if(qs2 && qs2.length===ps2.length){
+          var mq=Infinity; for(var a=0;a<qs2.length;a++){ if(qs2[a]>0 && qs2[a]<=mq){mq=qs2[a]; id2=a;} }
+          if(bq2){ for(var b=0;b<qs2.length;b++){ if(qs2[b]===bq2){id2=b;break;} } }
+          note=(note?note+', ':'')+'기본 '+fmt(qs2[id2])+'개 기준 단가';
+        }
+        price=ps2[id2]||0;
+      }
+    }
+    if(!price){ var am=/적용\s*단가\s*([\d,]+)\s*원/.exec(bodyTxt); if(am) price=prParseNum(am[1]); }
+  }
   return {name:name,img:img,price:price,note:note};
 }
 function prDecodeBuf(buf){
