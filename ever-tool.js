@@ -750,7 +750,7 @@ function prParseDoc(doc, pageUrl){
         var head=prTxt(cells[0]).replace(/\s+/g,'');
         var vals=[]; for(var c=1;c<cells.length;c++) vals.push(prParseNum(prTxt(cells[c])));
         if(head==='수량' && !qs2) qs2=vals;
-        else if((head==='단가'||head==='판매가') && !ps2) ps2=vals;
+        else if(/^(단가|판매가|정상가|소비자가)$/.test(head) && !ps2) ps2=vals;
       });
       if(ps2 && ps2.some(function(v){return v>0;})){
         var id2=ps2.length-1;
