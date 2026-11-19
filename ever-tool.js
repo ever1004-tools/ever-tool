@@ -922,7 +922,7 @@ function ppBuildSheet(wb,it,sh,imgInfo,used){
   return cl;
  }
  var r=1;
- put(r,1,r,8,d.brand,{fill:NAVY,color:'FFFFFFFF',bold:true,size:18,indent:1});ws.getRow(r).height=33.95;r++;
+ put(r,1,r,8,'',{fill:NAVY,color:'FFFFFFFF',bold:true,size:18,indent:1}).value={richText:[{text:'에버천사 판촉물',font:{name:FONT,size:18,bold:true,color:{argb:'FFFFFFFF'}}},{text:'   www.ever1004.com',font:{name:FONT,size:11,color:{argb:'FFFFFFFF'}}}]};ws.getRow(r).height=33.95;r++;
  put(r,1,r,8,'제품 제안서  |  기업 기념품 · 판촉물',{fill:BLUE,color:'FFFFFFFF',size:10,indent:1});ws.getRow(r).height=20.1;r++;
  ws.getRow(r).height=8.1;r++;
  if(d.rep.length){
