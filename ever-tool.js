@@ -138,18 +138,18 @@ tabs.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.ta
 
 /* 1 Budget */
 var B_IDS=['b_people','b_amt'],B_R=['b_mode','b_vat'];
-var EUCKR={" ":"%20","(":"%28",")":"%29",",":"%2C","가":"%B0%A1","거":"%B0%C5","건":"%B0%C7","고":"%B0%ED","구":"%B1%B8","그":"%B1%D7","급":"%B1%DE","기":"%B1%E2","다":"%B4%D9","담":"%B4%E3","대":"%B4%EB","데":"%B5%A5","랩":"%B7%A6","량":"%B7%AE","러":"%B7%AF","릎":"%B8%AD","리":"%B8%AE","링":"%B8%B5","마":"%B8%B6","맞":"%B8%C2","머":"%B8%D3","메":"%B8%DE","모":"%B8%F0","무":"%B9%AB","물":"%B9%B0","미":"%B9%CC","배":"%B9%E8","백":"%B9%E9","보":"%BA%B8","볼":"%BA%BC","부":"%BA%CE","블":"%BA%ED","산":"%BB%EA","생":"%BB%FD","선":"%BC%B1","성":"%BC%BA","세":"%BC%BC","소":"%BC%D2","손":"%BC%D5","수":"%BC%F6","슈":"%BD%B4","스":"%BD%BA","어":"%BE%EE","엄":"%BE%F6","에":"%BF%A1","요":"%BF%E4","용":"%BF%EB","우":"%BF%EC","울":"%BF%EF","이":"%C0%CC","장":"%C0%E5","전":"%C0%FC","조":"%C1%B6","지":"%C1%F6","채":"%C3%A4","첩":"%C3%B8","춤":"%C3%E3","충":"%C3%E6","커":"%C4%BF","컵":"%C4%C5","케":"%C4%C9","코":"%C4%DA","크":"%C5%A9","키":"%C5%B0","터":"%C5%CD","텀":"%C5%D2","트":"%C6%AE","티":"%C6%BC","패":"%C6%D0","펜":"%C6%E6","품":"%C7%B0","프":"%C7%C1","형":"%C7%FC","홍":"%C8%AB","활":"%C8%B0"};
+var EUCKR={" ":"%20","(":"%28",")":"%29",",":"%2C","가":"%B0%A1","거":"%B0%C5","건":"%B0%C7","고":"%B0%ED","구":"%B1%B8","그":"%B1%D7","급":"%B1%DE","기":"%B1%E2","다":"%B4%D9","담":"%B4%E3","대":"%B4%EB","데":"%B5%A5","랩":"%B7%A6","량":"%B7%AE","러":"%B7%AF","릎":"%B8%AD","리":"%B8%AE","링":"%B8%B5","마":"%B8%B6","맞":"%B8%C2","머":"%B8%D3","메":"%B8%DE","모":"%B8%F0","무":"%B9%AB","물":"%B9%B0","미":"%B9%CC","배":"%B9%E8","백":"%B9%E9","보":"%BA%B8","볼":"%BA%BC","부":"%BA%CE","블":"%BA%ED","산":"%BB%EA","생":"%BB%FD","선":"%BC%B1","성":"%BC%BA","세":"%BC%BC","소":"%BC%D2","손":"%BC%D5","수":"%BC%F6","슈":"%BD%B4","스":"%BD%BA","어":"%BE%EE","엄":"%BE%F6","에":"%BF%A1","요":"%BF%E4","용":"%BF%EB","우":"%BF%EC","울":"%BF%EF","이":"%C0%CC","장":"%C0%E5","전":"%C0%FC","조":"%C1%B6","지":"%C1%F6","채":"%C3%A4","첩":"%C3%B8","춤":"%C3%E3","충":"%C3%E6","커":"%C4%BF","컵":"%C4%C5","케":"%C4%C9","코":"%C4%DA","크":"%C5%A9","키":"%C5%B0","터":"%C5%CD","텀":"%C5%D2","트":"%C6%AE","티":"%C6%BC","패":"%C6%D0","펜":"%C6%E6","품":"%C7%B0","프":"%C7%C1","형":"%C7%FC","홍":"%C8%AB","활":"%C8%B0","양":"%BE%E7","말":"%B8%BB","파":"%C6%C4","치":"%C4%A1"};
 function encKR(s){s=String(s);var o='';for(var i=0;i<s.length;i++){var c=s.charAt(i);if(EUCKR[c]!=null)o+=EUCKR[c];else if(/^[A-Za-z0-9._~-]$/.test(c))o+=c;else o+=encodeURIComponent(c);}return o;}
 function searchUrl(name){return 'https://www.ever1004.com/product_w/search_keyword.asp?keytype=p_name&keyword='+encKR(name);}
-function itemLinks(items){return String(items).split(',').map(function(s){s=s.trim();if(!s)return '';return '<a href="'+searchUrl(s)+'" target="_blank" rel="noopener">'+s+'</a>';}).join('<span class="sep">, </span>');}
+function itemLinks(items){return String(items).split(',').map(function(s){s=s.trim();if(!s)return '';var p=s.split('|'),label=p[0].trim(),kw=(p[1]||p[0]).trim();return '<a href="'+searchUrl(kw)+'" target="_blank" rel="noopener">'+label+'</a>';}).join('<span class="sep">, </span>');}
 
 var BANDS=[
- {max:1000,label:'~1,000원',items:'볼펜, 물티슈, 부채, 스티커, 홍보용 메모지'},
- {max:3000,label:'~3,000원',items:'텀블러백, 마스크스트랩, 키링, 손거울, 소형 수첩'},
- {max:5000,label:'~5,000원',items:'머그컵, 보조배터리(소형), 에코백, 우산 케이스, 데스크 소품'},
+ {max:1000,label:'~1,000원',items:'볼펜, 물티슈, 부채, 스티커, 홍보용 메모지|메모지'},
+ {max:3000,label:'~3,000원',items:'텀블러백, 양말, 키링, 손거울, 소형 수첩|수첩'},
+ {max:5000,label:'~5,000원',items:'머그컵, 보조배터리(소형)|보조배터리, 에코백, 파우치, 데스크 소품|데스크'},
  {max:10000,label:'~10,000원',items:'텀블러, 무릎담요, 장우산, 무선충전기, 다이어리'},
- {max:20000,label:'~20,000원',items:'고급 텀블러, 보조배터리(대용량), 수건 세트, 생활용품 세트'},
- {max:Infinity,label:'20,000원 이상',items:'선물세트, 프리미엄 가전 소품, 맞춤 패키지 구성'}
+ {max:20000,label:'~20,000원',items:'고급 텀블러, 보조배터리(대용량)|보조배터리, 수건 세트, 생활용품 세트'},
+ {max:Infinity,label:'20,000원 이상',items:'선물세트, 프리미엄 가전 소품|가전, 맞춤 패키지 구성|맞춤'}
 ];
 function bModeLabel(){var m=root.querySelector('input[name="b_mode"]:checked').value;$('b_amt_label').textContent=m==='per'?'1인당 예산(원)':'총예산(원)';}
 root.querySelectorAll('input[name="b_mode"]').forEach(function(r){r.addEventListener('change',bModeLabel);});
