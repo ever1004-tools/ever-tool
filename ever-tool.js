@@ -1,5 +1,5 @@
 /* 에버천사 상품제작 실무도구 — same-origin overlay for ever1004.com
- * Load only when location.hash === '#ptool'. Renders in a Shadow DOM overlay.
+ * #ptool overlay in Shadow DOM. Also DOM-swaps the home 대표상품 box and /customer/info.asp guide when this file is loaded.
  */
 (function(){
 'use strict';
@@ -1118,4 +1118,101 @@ document.addEventListener('keydown', function(e){
   }
 });
 if(isActive()) onHash();
+
+
+/* ---- Order guide banner + 이용안내 page (DOM-only, reversible) ---- */
+var EVG_BANNER_SRC='https://ever1004-tools.github.io/ever-tool/img/order_banner@2x.png';
+var EVG_INFO_HREF='https://www.ever1004.com/customer/info.asp';
+var EVG_CSS=".evg-page{\n  --navy:#1F3A68;\n  --navy-d:#172C50;\n  --gold:#B08D57;\n  --gold-lt:#D9BC85;\n  --gold-line:#E3C78E;\n  --ivory:#FAF5EA;\n  --ivory-2:#F3EDE0;\n  --paper:#FFFCF6;\n  --line:#E4D9C3;\n  --ink:#1F2A3C;\n  --muted:#4A453C;\n  --warn-bg:#F8EFE0;\n  --ok-bg:#EEF2EA;\n  box-sizing:border-box;\n  width:100%;\n  max-width:760px;\n  margin:0 auto;\n  background:var(--ivory);\n  padding:28px 18px 40px;\n  text-align:left;\n  font-family:Pretendard,\"Noto Sans KR\",\"Apple SD Gothic Neo\",\"Malgun Gothic\",sans-serif;\n  color:var(--ink);\n  -webkit-font-smoothing:antialiased;\n  -moz-osx-font-smoothing:grayscale;\n  line-height:1.7;\n}\n.evg-page *,.evg-page *::before,.evg-page *::after{box-sizing:border-box}\n\n.evg-crumb{\n  font-size:13px;\n  font-weight:600;\n  color:var(--muted);\n  letter-spacing:-.02em;\n}\n.evg-crumb b{color:var(--navy);font-weight:700}\n.evg-hero{margin-top:0;margin-bottom:24px}\n.evg-eyebrow{\n  font-size:13px;\n  font-weight:600;\n  color:var(--gold);\n  letter-spacing:.08em;\n}\n .evg-hero h1{\n  font-family:\"Noto Serif KR\",serif;\n  font-weight:600;\n  font-size:36px;\n  color:var(--navy);\n  letter-spacing:-.04em;\n  line-height:1.2;\n  margin-top:6px;\n}\n.evg-rule{width:36px;height:3px;background:var(--gold);margin:14px 0 0}\n\n/* intro */\n.evg-intro{\n  background:var(--paper);\n  border:1px solid var(--line);\n  border-radius:14px;\n  padding:26px 28px 24px;\n  margin-bottom:36px;\n}\n.evg-intro .evg-kicker{\n  font-family:\"Noto Serif KR\",serif;\n  font-size:15px;\n  font-weight:600;\n  color:var(--gold);\n  letter-spacing:.04em;\n  margin-bottom:10px;\n}\n.evg-intro p{\n  font-size:16px;\n  font-weight:400;\n  color:var(--ink);\n  letter-spacing:-.02em;\n  word-break:keep-all;\n}\n.evg-note{\n  margin-top:16px;\n  background:var(--warn-bg);\n  border-left:4px solid var(--gold);\n  border-radius:0 10px 10px 0;\n  padding:12px 16px;\n  font-size:14.5px;\n  font-weight:600;\n  color:var(--ink);\n  letter-spacing:-.02em;\n  word-break:keep-all;\n}\n\n/* steps */\n.evg-sec-h{\n  display:flex;\n  align-items:baseline;\n  gap:12px;\n  margin:0 0 16px;\n}\n.evg-sec-h h2{\n  font-family:\"Noto Serif KR\",serif;\n  font-weight:600;\n  font-size:26px;\n  color:var(--navy);\n  letter-spacing:-.03em;\n  line-height:1.3;\n}\n.evg-sec-h .evg-en{\n  font-size:12px;\n  font-weight:600;\n  color:var(--gold);\n  letter-spacing:.06em;\n}\n.evg-steps{\n  display:grid;\n  grid-template-columns:repeat(4,1fr);\n  gap:10px;\n  margin-bottom:40px;\n  position:relative;\n}\n.evg-step{\n  background:var(--paper);\n  border:1px solid var(--line);\n  border-radius:14px;\n  padding:16px 10px 14px;\n  text-align:center;\n}\n.evg-ic{\n  width:52px;height:52px;border-radius:50%;\n  background:var(--navy);\n  display:flex;align-items:center;justify-content:center;\n  margin:0 auto 10px;\n}\n.evg-ic svg{width:26px;height:26px}\n.evg-step .evg-num{\n  font-size:11px;font-weight:700;color:var(--gold);\n  letter-spacing:.06em;\n}\n.evg-step h3{\n  font-family:\"Noto Serif KR\",serif;\n  font-weight:600;\n  font-size:18px;\n  color:var(--navy);\n  letter-spacing:-.03em;\n  margin:4px 0 8px;\n}\n.evg-step p{\n  font-size:13px;\n  font-weight:400;\n  color:var(--ink);\n  letter-spacing:-.03em;\n  line-height:1.55;\n  word-break:keep-all;\n  text-align:left;\n}\n\n/* cards */\n.evg-grid-2{\n  display:grid;\n  grid-template-columns:1.3fr .9fr;\n  gap:16px;\n  margin-bottom:16px;\n}\n.evg-grid-2b{\n  display:grid;\n  grid-template-columns:1fr 1fr;\n  gap:16px;\n  margin-bottom:16px;\n}\n.evg-card{\n  background:var(--paper);\n  border:1px solid var(--line);\n  border-radius:14px;\n  padding:22px 24px 20px;\n  margin-bottom:16px;\n}\n.evg-card h3{\n  font-family:\"Noto Serif KR\",serif;\n  font-weight:600;\n  font-size:22px;\n  color:var(--navy);\n  letter-spacing:-.03em;\n  margin-bottom:4px;\n}\n.evg-card .evg-bar{width:24px;height:3px;background:var(--gold);margin:8px 0 14px}\n.evg-card ul{list-style:none}\n.evg-card li{\n  position:relative;\n  padding:0 0 11px 16px;\n  font-size:15px;\n  font-weight:400;\n  color:var(--ink);\n  letter-spacing:-.02em;\n  line-height:1.65;\n  word-break:keep-all;\n}\n.evg-card li:last-child{padding-bottom:0}\n.evg-card li::before{\n  content:\"\";\n  position:absolute;left:0;top:10px;\n  width:6px;height:6px;border-radius:50%;\n  background:var(--gold);\n}\n.evg-hl{\n  background:var(--warn-bg);\n  border-radius:10px;\n  padding:12px 14px;\n  margin-top:12px;\n  font-size:14.5px;\n  font-weight:600;\n  color:var(--ink);\n  letter-spacing:-.02em;\n  line-height:1.6;\n  word-break:keep-all;\n}\n.evg-hl.evg-navy{\n  background:#EEF1F6;\n  border-left:4px solid var(--navy);\n  border-radius:0 10px 10px 0;\n}\n.evg-hl.evg-gold{\n  border-left:4px solid var(--gold);\n  border-radius:0 10px 10px 0;\n}\n.evg-big-num{\n  font-family:\"Noto Serif KR\",serif;\n  font-size:34px;\n  font-weight:600;\n  color:var(--navy);\n  letter-spacing:-.04em;\n  line-height:1;\n  margin:2px 0 8px;\n}\n.evg-big-num span{font-size:16px;margin-left:4px}\n\n/* withdrawal list */\n.evg-olist{list-style:none;margin-top:6px}\n.evg-olist li{\n  display:flex;gap:10px;\n  padding:8px 0;\n  border-top:1px solid #F0E6D4;\n  font-size:14.5px;\n  font-weight:400;\n  color:var(--ink);\n  letter-spacing:-.02em;\n  line-height:1.6;\n  word-break:keep-all;\n}\n.evg-olist li:first-child{border-top:0}\n.evg-olist .evg-n{\n  flex-shrink:0;\n  width:22px;height:22px;border-radius:50%;\n  background:var(--navy);color:#F6F0E4;\n  font-size:11px;font-weight:700;\n  display:flex;align-items:center;justify-content:center;\n  margin-top:2px;\n}\n\n/* contact */\n.evg-contact{\n  background:var(--navy);\n  border-radius:16px;\n  padding:28px 32px 26px;\n  color:#F6F0E4;\n  margin-top:8px;\n  display:grid;\n  grid-template-columns:1.1fr 1fr;\n  gap:24px;\n}\n.evg-contact h3{\n  font-family:\"Noto Serif KR\",serif;\n  font-weight:600;\n  font-size:22px;\n  color:#F6F0E4;\n  letter-spacing:-.03em;\n}\n.evg-contact .evg-bar{background:var(--gold-lt);width:24px;height:3px;margin:8px 0 16px}\n.evg-contact .evg-tel{\n  font-family:\"Noto Serif KR\",serif;\n  font-size:32px;\n  font-weight:600;\n  color:#E3C78E;\n  letter-spacing:-.03em;\n  line-height:1.15;\n}\n.evg-contact .evg-tel-l{font-size:13px;font-weight:600;color:#D9BC85;letter-spacing:.04em;margin-bottom:4px}\n.evg-contact p, .evg-contact li{\n  font-size:14.5px;\n  font-weight:400;\n  color:#F0E8D8;\n  letter-spacing:-.02em;\n  line-height:1.65;\n  word-break:keep-all;\n}\n.evg-contact .evg-meta{margin-top:12px}\n.evg-kv{display:flex;gap:8px;margin-top:6px;font-size:14.5px;color:#F0E8D8;letter-spacing:-.02em}\n.evg-kv b{color:#E3C78E;font-weight:700;flex-shrink:0;min-width:72px}\n\n.evg-nowrap{white-space:nowrap}\n.evg-grid-2,.evg-grid-2b{align-items:stretch}\n.evg-grid-2 > .evg-card,.evg-stack{height:100%}\n.evg-grid-2b > .evg-card{display:flex;flex-direction:column;align-self:stretch}\n.evg-grid-2b > .evg-card .evg-hl{margin-top:auto}\n.evg-stack{display:flex;flex-direction:column;gap:16px}\n.evg-stack > .evg-card:last-child{flex:1}\n.evg-foot-note{\n  margin-top:22px;\n  font-size:12px;\n  font-weight:400;\n  color:var(--muted);\n  letter-spacing:-.02em;\n  text-align:center;\n}\n\n/* mobile */\n@media (max-width: 640px){\n  \n   .evg-hero h1{font-size:32px}\n  .evg-intro{padding:18px 18px 16px}\n  .evg-intro p{font-size:15px}\n  .evg-sec-h h2{font-size:22px}\n  .evg-steps{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px}\n  .evg-step{padding:16px 12px 14px;text-align:left}\n  .evg-ic{margin:0 0 8px}\n  .evg-step h3{font-size:16px}\n  .evg-step p{font-size:12.5px}\n  .evg-grid-2,.evg-grid-2b{grid-template-columns:1fr;gap:12px}\n  .evg-card{padding:18px 18px 16px;margin-bottom:12px}\n  .evg-card h3{font-size:20px}\n  .evg-card li{font-size:14.5px}\n  .evg-contact{grid-template-columns:1fr;padding:22px 20px 20px;gap:8px}\n  .evg-contact .evg-tel{font-size:28px}\n  .evg-big-num{font-size:30px}\n}";
+var EVG_HTML="<div class=\"evg-page\">\n<div class=\"evg-hero\">\n    <p class=\"evg-eyebrow\">CUSTOMER GUIDE</p>\n    <h1>이용안내</h1>\n    <div class=\"evg-rule\"></div>\n  </div>\n\n  <section class=\"evg-intro\">\n    <p class=\"evg-kicker\">INFORMATION</p>\n    <p>(주)벨카리노에서는 판촉물, 잡화를 제조공장에서 직접 공급받아 보다 최적의 가격으로 최상의 상품을 소비자에게 공급하고 있습니다. 본 사이트에 게시된 상품은 실제와 약간의 차이가 있을 수도 있으며, 주문용량 및 기타 사정에 따라 가격이 변동될 수 있으니 주문 전에 mail 또는 전화/팩스로 연락해 주시면, 성의껏 답변해 드리겠습니다.</p>\n    <div class=\"evg-note\">본 사이트에 게시된 상품은 실제와 약간의 차이가 있을 수 있으며, 주문용량 및 기타 사정에 따라 가격이 변동될 수 있습니다.</div>\n  </section>\n\n  <div class=\"evg-sec-h\">\n    <h2>주문 진행 순서</h2>\n    <span class=\"evg-en\">HOW TO ORDER</span>\n  </div>\n  <div class=\"evg-steps\">\n    <div class=\"evg-step\">\n      <div class=\"evg-ic\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#E3C78E\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 5h16v11H9l-5 4z\"/><path d=\"M8 9h8M8 12h5\"/></svg></div>\n      <div class=\"evg-num\">01</div>\n      <h3>주문·상담</h3>\n      <p>주문서 메모란에 인쇄 여부를 간단히 적고, 인쇄 관련 자료실에 파일을 올려 주세요. 인쇄가 포함된 주문은 상담원이 전화로 확인해 드립니다.</p>\n    </div>\n    <div class=\"evg-step\">\n      <div class=\"evg-ic\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#E3C78E\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3.5\" y=\"6\" width=\"17\" height=\"12.5\" rx=\"2\"/><path d=\"M3.5 10h17M7 15h4\"/></svg></div>\n      <div class=\"evg-num\">02</div>\n      <h3>대금결제</h3>\n      <p>계좌입금, 카드결제 모두 가능하며 결제가 완료된 이후에만 제작에 들어갑니다.</p>\n    </div>\n    <div class=\"evg-step\">\n      <div class=\"evg-ic\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#E3C78E\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"3.5\" width=\"16\" height=\"17\" rx=\"2\"/><path d=\"M8 9l2.5 2.5L16 7M8 15h8\"/></svg></div>\n      <div class=\"evg-num\">03</div>\n      <h3>인쇄 교정</h3>\n      <p>고객님께서 직접 교정을 마치신 인쇄문구대로 인쇄합니다. 교정 시 세심한 주의를 부탁드립니다.</p>\n    </div>\n    <div class=\"evg-step\">\n      <div class=\"evg-ic\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#E3C78E\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 7h11v9H3zM14 10h4l3 3v3h-7\"/><circle cx=\"7\" cy=\"17.5\" r=\"1.8\"/><circle cx=\"17\" cy=\"17.5\" r=\"1.8\"/></svg></div>\n      <div class=\"evg-num\">04</div>\n      <h3>제작·배송</h3>\n      <p>제품과 수량에 따라 다소 차이가 있으나, 보통 발주일로부터 5~7일 이내 배송을 원칙으로 합니다.</p>\n    </div>\n  </div>\n\n  <div class=\"evg-card\">\n    <h3>주문방법</h3>\n    <div class=\"evg-bar\"></div>\n    <ul>\n      <li>주문서의 메모란에 인쇄여부에 대한 내용만 간단히 기입하시고 인쇄 관련 자료실에 인쇄관련 파일과 인쇄여부, 인쇄방식등 내용을 올려주시기 바랍니다. 인쇄여부가 포함된 주문은 저희 상담원이 전화로 확인을 드립니다.</li>\n      <li>주문이나 배송에 대한 내용은 상단의 주문/배송 조회에서 확인이 가능합니다.</li>\n      <li>선물 포장을 원하시는 경우 별도의 작업비가 청구됩니다.</li>\n    </ul>\n  </div>\n\n  <div class=\"evg-grid-2\">\n    <div class=\"evg-card\" style=\"margin:0\">\n      <h3>인쇄안내</h3>\n      <div class=\"evg-bar\"></div>\n      <ul>\n        <li>최소수량 미만 주문, 인쇄도수 추가, 스티커 제작 시나 레이져인쇄 등 특수인쇄를 하실 경우에는 별도의 인쇄비가 추가됩니다.</li>\n        <li>일부 제품의 경우 제품의 특성이나 재질에 따라 인쇄가 불가능할 수 있습니다.</li>\n        <li>인쇄에 대한 자료는 인쇄관련 자료실에 업로드하시기 바랍니다.</li>\n        <li>팩스(<span class=\"evg-nowrap\">02-3409-1322</span>) 나 <span class=\"evg-nowrap\">이메일(ever4977@naver.com)로</span> 인쇄문구를 보내실 때는 <span class=\"evg-nowrap\">고객상담실(TEL: 1577-4977)로</span> 확인 전화 주시면 감사하겠습니다.</li>\n      </ul>\n      <div class=\"evg-hl evg-gold\">고객님께서 직접 교정을 마치신 인쇄문구대로 인쇄를 마친 뒤 발견한 오타 및 인쇄 내용의 오류에 대해서는 저희 회사에서 책임을 지지 않으므로 반품 및 교환이 불가능 합니다. 교정 시 세심한 주의를 부탁드립니다.</div>\n    </div>\n    <div class=\"evg-stack\">\n      <div class=\"evg-card\" style=\"margin:0\">\n        <h3>샘플신청</h3>\n        <div class=\"evg-bar\"></div>\n        <ul>\n          <li>수량별 단가표의 최소수량 이하 주문시 자동적으로 샘플주문으로 인지하며 배송비 착불로 발송됩니다.</li>\n        </ul>\n      </div>\n      <div class=\"evg-card\" style=\"margin:0\">\n        <h3>배송기한</h3>\n        <div class=\"evg-bar\"></div>\n        <div class=\"evg-big-num\">5~7일<span>이내</span></div>\n        <ul>\n          <li>주문된 상품은 제품과 수량에 따라 다소 차이가 있으나 보통 발주일로부터 5~7일 이내 배송을 원칙으로 합니다.</li>\n        </ul>\n      </div>\n    </div>\n  </div>\n\n  <div class=\"evg-grid-2b\">\n    <div class=\"evg-card\" style=\"margin:0\">\n      <h3>대금결제 및 세금계산서 발행</h3>\n      <div class=\"evg-bar\"></div>\n      <ul>\n        <li>대금결제는 계좌입금, 카드결제 모두 가능하며 결제가 완료된 이후에만 제작에 들어갑니다.</li>\n        <li>세금 계산서 발행에 대한 내용은 [세금계산서 요청]의 메뉴에서 사업자 등록증의 팩스파일을 등록하시거나 <span class=\"evg-nowrap\">팩스(02-3409-1322)로</span> 사업자 등록증을 보내주시면 됩니다.</li>\n      </ul>\n      <div class=\"evg-hl evg-navy\">결제가 완료된 이후에만 제작에 들어갑니다.</div>\n    </div>\n    <div class=\"evg-card\" style=\"margin:0\">\n      <h3>청약철회</h3>\n      <div class=\"evg-bar\"></div>\n      <ul>\n        <li>재화등의 구매에 관한 계약을 체결한 이용자는 수신확인의 통지를 받은 날부터 7일 이내에는 청약의 철회를 할 수 있습니다.</li>\n        <li>이용자는 재화등을 배송받은 경우 다음 각호의 1에 해당하는 경우에는 반품 및 교환을 할 수 없습니다.</li>\n      </ul>\n      <ol class=\"evg-olist\">\n        <li><span class=\"evg-n\">1</span><span>이용자에게 책임 있는 사유로 재화 등이 멸실 또는 훼손된 경우(다만, 재화 등의 내용을 확인하기 위하여 포장 등을 훼손한 경우에는 청약철회를 할 수 있습니다)</span></li>\n        <li><span class=\"evg-n\">2</span><span>이용자의 사용 또는 일부 소비에 의하여 재화 등의 가치가 현저히 감소한 경우</span></li>\n        <li><span class=\"evg-n\">3</span><span>시간의 경과에 의하여 재판매가 곤란할 정도로 재화등의 가치가 현저히 감소한 경우</span></li>\n        <li><span class=\"evg-n\">4</span><span>같은 성능을 지닌 재화등으로 복제가 가능한 경우 그 원본인 재화 등의 포장을 훼손한 경우</span></li>\n      </ol>\n    </div>\n  </div>\n\n  <div class=\"evg-contact\">\n    <div>\n      <h3>고객상담</h3>\n      <div class=\"evg-bar\"></div>\n      <p class=\"evg-tel-l\">대표전화</p>\n      <p class=\"evg-tel\"><span class=\"evg-nowrap\">1577-4977</span></p>\n      <div class=\"evg-kv\"><b>팩스번호</b><span><span class=\"evg-nowrap\">02-3409-1322</span></span></div>\n      <div class=\"evg-kv\"><b>고객상담</b><span><span class=\"evg-nowrap\">ever4977@naver.com</span></span></div>\n    </div>\n    <div>\n      <p class=\"evg-meta\">서울특별시 성동구 아차산로 103 (성수동2가) 지하1층 2103-2호</p>\n      <div class=\"evg-kv\"><b>대표</b><span>정무송, 홍승순</span></div>\n      <div class=\"evg-kv\"><b>사업자등록</b><span><span class=\"evg-nowrap\">516-81-01269</span></span></div>\n      <div class=\"evg-kv\"><b>통신판매업</b><span>제 2019-서울성동-753 호</span></div>\n    </div>\n  </div>\n</div>";
+
+function evgIsMobile(){
+  var p=String(location.pathname||'').toLowerCase();
+  if(p.indexOf('/_mobile/')===0) return true;
+  var h=String(location.hostname||'').toLowerCase();
+  if(h==='m.ever1004.com' || h.indexOf('m.')===0) return true;
+  return false;
+}
+function evgReady(fn){
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', fn);
+  else fn();
+}
+function evgEnhanceHomeBanner(){
+  if(evgIsMobile()) return;
+  var box=document.querySelector('#customer .layer .news')||document.querySelector('div.news');
+  if(!box || box.getAttribute('data-evg-banner')) return;
+  if(!box.querySelector('img[src*="Main20190620_2"], img[src*="Main20200107"]')) return;
+  box.setAttribute('data-evg-banner','1');
+  var i, kids=box.children;
+  for(i=0;i<kids.length;i++) kids[i].style.display='none';
+  var a=document.createElement('a');
+  a.href=EVG_INFO_HREF;
+  a.setAttribute('data-evg-link','1');
+  a.style.cssText='display:block;width:281px;margin:20px 0 0 0;text-decoration:none;border:0;';
+  var img=document.createElement('img');
+  img.src=EVG_BANNER_SRC;
+  img.width=281;
+  img.height=300;
+  img.alt='주문 진행 순서';
+  img.style.cssText='display:block;border:0;width:281px;height:300px;';
+  a.appendChild(img);
+  box.appendChild(a);
+}
+function evgFindInfoTable(){
+  var imgs=document.querySelectorAll('img[src*="Main20180515_8"]');
+  var i, el, t;
+  for(i=0;i<imgs.length;i++){
+    el=imgs[i];
+    t=null;
+    while(el){
+      if(el.tagName==='TABLE' && String(el.getAttribute('width')||el.width)==='760'){ t=el; break; }
+      el=el.parentElement;
+    }
+    if(t) return t;
+  }
+  var tables=document.getElementsByTagName('table');
+  for(i=0;i<tables.length;i++){
+    t=tables[i];
+    if(String(t.getAttribute('width')||t.width)!=='760') continue;
+    var tx=t.textContent||'';
+    if(tx.indexOf('INFORMATION')!==-1 && tx.indexOf('주문방법')!==-1) return t;
+  }
+  return null;
+}
+function evgEnsureGuideStyle(){
+  if(document.getElementById('evg-guide-css')) return;
+  var st=document.createElement('style');
+  st.id='evg-guide-css';
+  st.type='text/css';
+  st.appendChild(document.createTextNode(EVG_CSS));
+  (document.head||document.documentElement).appendChild(st);
+}
+function evgEnhanceInfoGuide(){
+  if(evgIsMobile()) return;
+  var path=String(location.pathname||'').toLowerCase();
+  if(!/\/customer\/info\.asp$/i.test(path)) return;
+  if(document.getElementById('evg-root')) return;
+  var table=evgFindInfoTable();
+  if(!table) return;
+  evgEnsureGuideStyle();
+  try{ ensureFonts(); }catch(e){}
+  var rows=table.rows, i;
+  for(i=0;i<rows.length;i++) rows[i].style.display='none';
+  var tr=table.insertRow(-1);
+  tr.setAttribute('data-evg-row','1');
+  var td=tr.insertCell(0);
+  td.colSpan=20;
+  td.vAlign='top';
+  td.align='left';
+  td.style.cssText='padding:0;margin:0;border:0;background:transparent;';
+  var wrap=document.createElement('div');
+  wrap.id='evg-root';
+  wrap.innerHTML=EVG_HTML;
+  td.appendChild(wrap);
+}
+evgReady(function(){
+  try{ evgEnhanceHomeBanner(); }catch(e){}
+  try{ evgEnhanceInfoGuide(); }catch(e){}
+});
+
 })();
