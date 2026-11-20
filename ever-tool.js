@@ -586,22 +586,73 @@ function ppNormalizeInput(raw){
  if(raw.charAt(0)==='/'||/product_view\.asp/i.test(raw)||/^(www\.)?ever1004\.com/i.test(raw)){try{return new URL(raw,'https://www.ever1004.com/').href;}catch(e){}}
  return 'https://'+raw.replace(/^\/+/,'');
 }
-function ppFetch(url){
+function ppIsMobileCtx(){
+ try{
+  if(typeof location!=='undefined'&&/^\/_mobile\//i.test(location.pathname||''))return true;
+  return typeof navigator!=='undefined'&&/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent||'');
+ }catch(e){return false;}
+}
+function ppMobileUrl(url){
+ try{var u=new URL(url,'https://www.ever1004.com/');
+  if(/^\/_mobile\//i.test(u.pathname))return u.href;
+  u.pathname='/_mobile'+u.pathname;return u.href;
+ }catch(e){return url;}
+}
+function ppPcUrl(url){
+ try{var u=new URL(url,'https://www.ever1004.com/');
+  u.pathname=u.pathname.replace(/^\/_mobile(?=\/)/i,'');return u.href;
+ }catch(e){return url;}
+}
+function ppFetchOne(fetchUrl,pageUrl){
  return new Promise(function(resolve,reject){
   if(typeof fetch!=='function'){reject(new Error('no-fetch'));return;}
-  var done=false;
+  var done=false,isMobilePage=false;
   var t=setTimeout(function(){if(!done){done=true;reject(new Error('timeout'));}},15000);
-  fetch(ppSameOrigin(url),{credentials:'same-origin',headers:{'Accept':'text/html'}})
-   .then(function(r){if(!r.ok)throw new Error('http '+r.status);return r.arrayBuffer();})
+  fetch(ppSameOrigin(fetchUrl),{credentials:'same-origin',headers:{'Accept':'text/html'}})
+   .then(function(r){
+    if(!r.ok)throw new Error('http '+r.status);
+    try{isMobilePage=/^\/_mobile\//i.test(new URL(r.url).pathname);}catch(e){}
+    return r.arrayBuffer();
+   })
    .then(function(buf){
     var html=ppDecodeBuf(buf);
     if(!ppLooksHtml(html))throw new Error('stub');
     var doc=new DOMParser().parseFromString(html,'text/html');
-    var p=ppParseDoc(doc,url);
+    var p=ppParseDoc(doc,pageUrl);
     if(!p.title&&!p.img&&!p.tiers)throw new Error('empty');
-    if(done)return;done=true;clearTimeout(t);resolve(p);
+    if(done)return;done=true;clearTimeout(t);resolve({p:p,mobile:isMobilePage});
    })
    .catch(function(e){if(done)return;done=true;clearTimeout(t);reject(e);});
+ });
+}
+/* 모바일 접속에서는 서버가 상품 주소를 /_mobile/ 버전으로 돌려보내는데, 모바일 페이지에는 원산지·규격·재질·제작기간 같은 상세 정보가 없다.
+   그래서 모바일 페이지로 먼저 채운 뒤(빠름), PC 화면 모드를 잠깐 켜서 PC 상세 정보를 읽어 빈 칸을 보충하고 곧바로 모바일 모드로 되돌린다. */
+var PP_PC={n:0,chain:Promise.resolve(),on:false};
+function ppSoftGet(u){return fetch(u,{credentials:'same-origin'}).then(function(r){return r.arrayBuffer();});}
+function ppEnrichPc(url){
+ PP_PC.n++;
+ var job=PP_PC.chain.then(function(){
+  var pre=PP_PC.on?Promise.resolve():ppSoftGet('/main/index.asp?pcMode=Y').then(function(){PP_PC.on=true;});
+  return pre.then(function(){return ppFetchOne(ppPcUrl(url),url);});
+ });
+ var fin=function(){
+  PP_PC.n--;
+  if(PP_PC.n===0&&PP_PC.on){
+   return ppSoftGet('/_mobile/main/index.asp?pcMode=N').catch(function(){return ppSoftGet('/_mobile/main/index.asp?pcMode=N');}).then(function(){PP_PC.on=false;},function(){PP_PC.on=false;});
+  }
+ };
+ PP_PC.chain=job.then(fin,fin);
+ return job;
+}
+/* onFirst(p): 첫 결과(모바일/PC 페이지), onMore(p): 모바일일 때 PC 상세 보충 결과 */
+function ppFetch(url,onMore){
+ var pc=ppPcUrl(url),mo=ppMobileUrl(url);
+ var order=ppIsMobileCtx()?[mo,pc]:[pc,mo];
+ return ppFetchOne(order[0],url).catch(function(){return ppFetchOne(order[1],url);}).then(function(res){
+  if(res.mobile&&typeof onMore==='function'&&ppIsMobileCtx()){
+   ppEnrichPc(url).then(function(r2){onMore(r2.p);},function(){});
+  }
+  return res.p;
  });
 }
 
@@ -646,27 +697,107 @@ $('pr_rows').addEventListener('click',function(e){
  else if(act==='down'&&i<PP_ITEMS.length-1){var t2=PP_ITEMS[i];PP_ITEMS[i]=PP_ITEMS[i+1];PP_ITEMS[i+1]=t2;}
  ppSave();ppRenderRows();
 });
+/* 입력 칸에서 주소 뽑기: 앞뒤 글자/괄호/따옴표 제거 */
+function ppExtractUrls(raw){
+ var all=[],hit=[];
+ String(raw||'').split(/[\r\n\s,]+/).forEach(function(tok){
+  tok=tok.trim();if(!tok)return;
+  var m=/(https?:\/\/[^\s<>"'`]+|\/\/[^\s<>"'`]+|(?:[a-z0-9-]+\.)*(?:naver\.me|ever1004\.com)[^\s<>"'`]*)/i.exec(tok);
+  var isUrl=!!m;
+  if(m)tok=m[1];
+  tok=tok.replace(/[)\]}>.,;:!?'"”’」』]+$/,'');
+  if(!tok)return;
+  all.push(tok);if(isUrl||/product_view\.asp/i.test(tok))hit.push(tok);
+ });
+ return hit.length?hit:all;
+}
+function ppIsNaverShort(u){
+ try{return /^(https?:\/\/)?naver\.me\//i.test(String(u).trim());}catch(e){return false;}
+}
+/* 주소 안에 감싸진 실제 주소(url=…) 풀기: 네이버 로그인/앱 브릿지 등 */
+function ppUnwrapUrl(u,depth){
+ depth=depth||0;
+ try{
+  var x=new URL(u);
+  if(/ever1004\.com$/i.test(x.hostname))return x.href;
+  if(depth<3){
+   var inner=x.searchParams.get('url')||x.searchParams.get('dst')||'';
+   if(/^https?:\/\//i.test(inner))return ppUnwrapUrl(inner,depth+1);
+   var m=/[?&]url=(https?%3A[^&]+)/i.exec(u);
+   if(m){try{return ppUnwrapUrl(decodeURIComponent(m[1]),depth+1);}catch(e){}}
+  }
+  return x.href;
+ }catch(e){return u;}
+}
+/* 브라우저는 다른 사이트(naver.me)의 리다이렉트 주소를 직접 읽을 수 없어서(CORS) 공개 중계 서비스로 최종 주소를 확인 */
+function ppResolveShort(u){
+ var target=/^https?:\/\//i.test(u)?u:'https://'+u.replace(/^\/+/,'');
+ function tryFetch(mk,ms){
+  return new Promise(function(resolve,reject){
+   var done=false;var t=setTimeout(function(){if(!done){done=true;reject(new Error('timeout'));}},ms);
+   mk().then(function(r){if(done)return;done=true;clearTimeout(t);if(r)resolve(r);else reject(new Error('none'));})
+    .catch(function(e){if(done)return;done=true;clearTimeout(t);reject(e);});
+  });
+ }
+ var viaJina=function(){return tryFetch(function(){
+  return fetch('https://r.jina.ai/'+target,{headers:{'Accept':'application/json','X-Respond-With':'no-content'}})
+   .then(function(r){return r.json();}).then(function(j){var d=j&&j.data;return d&&(d.finalUrl||d.url)&&String(d.finalUrl||d.url)!==target?String(d.finalUrl):'';});
+ },25000);};
+ var viaOrigins=function(){return tryFetch(function(){
+  return fetch('https://api.allorigins.win/get?url='+encodeURIComponent(target))
+   .then(function(r){return r.json();}).then(function(j){var s=j&&j.status&&j.status.url;return s&&s!==target?String(s):'';});
+ },15000);};
+ return viaJina().catch(function(){return viaOrigins();});
+}
+function ppNote(msg){var o=$('pr_out');if(o)o.innerHTML+='<div class="warn">'+msg+'</div>';}
+var PP_KEYS=['title','model','code','category','price','maker','origin','color','minqty','img','specs','features','tiers','memo','print','pack','lead'];
+function ppApply(it,p,onlyEmpty){
+ var i=ppFind(it.id);if(i<0)return;
+ var cur=PP_ITEMS[i],miss=[];
+ PP_KEYS.forEach(function(k){if(p[k]&&(!onlyEmpty||!cur[k]||(k==='title'&&/^상품번호\s/.test(cur[k]))))cur[k]=p[k];});
+ if(!onlyEmpty||!cur.baseQty)cur.baseQty=p.baseQty||cur.baseQty||0;
+ var src=onlyEmpty?cur:p;
+ if(!src.title||/^상품번호\s/.test(src.title))miss.push('상품명');if(!src.img)miss.push('이미지');if(!src.tiers)miss.push('단가표');
+ cur.miss=miss;cur.status=miss.length?'partial':'ok';
+ ppSave();ppRenderRows();
+}
+function ppStartItem(it,rawUrl){
+ var meta=prParseUrl(ppNormalizeInput(rawUrl));
+ it.url=meta.canonical;it.code=meta.p_idx;it.title=meta.p_idx?('상품번호 '+meta.p_idx):'';it.status='loading';
+ ppFetch(meta.canonical,function(p2){ppApply(it,p2,true);}).then(function(p){
+  ppApply(it,p,false);
+ }).catch(function(){
+  var i=ppFind(it.id);if(i<0)return;
+  PP_ITEMS[i].status='manual';ppSave();ppRenderRows();
+ });
+}
 function ppAddFromUrls(){
  var raw=($('pr_url').value||'');
- var list=raw.split(/[\r\n\s,]+/).map(function(s){return s.trim();}).filter(Boolean);
+ var list=ppExtractUrls(raw);
  if(!list.length){$('pr_out').innerHTML='<div class="warn">상품 페이지 주소를 붙여 넣어 주세요.</div>';return;}
  $('pr_url').value='';$('pr_out').innerHTML='';
  list.forEach(function(r){
-  var meta=prParseUrl(ppNormalizeInput(r));
-  var it=ppNew({url:meta.canonical,code:meta.p_idx,title:meta.p_idx?('상품번호 '+meta.p_idx):'',status:'loading'});
+  if(ppIsNaverShort(r)){
+   var it0=ppNew({url:r,title:'네이버 단축주소 확인 중…',status:'loading'});
+   PP_ITEMS.push(it0);
+   ppResolveShort(r).then(function(final){
+    var real=ppUnwrapUrl(final);
+    var i=ppFind(it0.id);if(i<0)return;
+    if(/ever1004\.com/i.test(real)&&/p_idx=\d+/i.test(real)){ppStartItem(PP_ITEMS[i],real);ppSave();ppRenderRows();return;}
+    PP_ITEMS.splice(i,1);ppSave();ppRenderRows();
+    var host='';try{host=new URL(real).hostname;}catch(e){}
+    if(/naver\.com$/i.test(host))ppNote('네이버 단축주소('+esc(r)+')는 스마트스토어·브랜드스토어 상품으로 연결돼요. 이 도구는 에버천사 상품 주소만 자동으로 읽을 수 있어요. 에버천사 상품 주소(www.ever1004.com/…p_idx=번호)를 붙여 넣거나 \'직접 입력\'으로 추가해 주세요.');
+    else ppNote('네이버 단축주소('+esc(r)+')가 에버천사 상품 주소로 확인되지 않았어요. 에버천사 상품 페이지 주소를 직접 붙여 넣어 주세요.');
+   }).catch(function(){
+    var i=ppFind(it0.id);if(i<0)return;
+    PP_ITEMS.splice(i,1);ppSave();ppRenderRows();
+    ppNote('네이버 단축주소('+esc(r)+')를 열지 못했어요. 잠시 후 다시 시도하거나, 단축 전 원래 주소(에버천사 상품 페이지 주소)를 붙여 넣어 주세요.');
+   });
+   return;
+  }
+  var it=ppNew({status:'loading'});
   PP_ITEMS.push(it);
-  ppFetch(meta.canonical).then(function(p){
-   var i=ppFind(it.id);if(i<0)return;
-   var cur=PP_ITEMS[i],miss=[];
-   ['title','model','code','category','price','maker','origin','color','minqty','img','specs','features','tiers','memo','print','pack','lead'].forEach(function(k){if(p[k])cur[k]=p[k];});
-   cur.baseQty=p.baseQty||0;
-   if(!p.title)miss.push('상품명');if(!p.img)miss.push('이미지');if(!p.tiers)miss.push('단가표');
-   cur.miss=miss;cur.status=miss.length?'partial':'ok';
-   ppSave();ppRenderRows();
-  }).catch(function(){
-   var i=ppFind(it.id);if(i<0)return;
-   PP_ITEMS[i].status='manual';ppSave();ppRenderRows();
-  });
+  ppStartItem(it,r);
  });
  ppSave();ppRenderRows();
 }
